@@ -63,10 +63,15 @@ int main(int argc, char *argv[])
 	struct timeval start, end;
 	vres res;
 	const char *data = "hello world";
+	
+	if(atoi(argv[3]) == 1){
+		/* Initialize TC services and daemons */
+		context = vinit(get_tc_config_file(tc_config_path, PATH_MAX),
+				DEFAULT_LOG_FILE, 77);
+	}else{
+		context = vinit(NULL, DEFAULT_LOG_FILE, 0);
+	}
 
-	/* Initialize TC services and daemons */
-	context = vinit(get_tc_config_file(tc_config_path, PATH_MAX),
-			DEFAULT_LOG_FILE, 77);
 
 	if (context == NULL) {
 		NFS4_ERR("Error while initializing tc_client using config "
@@ -75,29 +80,35 @@ int main(int argc, char *argv[])
 		return EIO;
 	}
 
-
+	char* paths[N];
 	for(i = 0; i < N; i++){
 		char base = (char) i + 'a';
-		char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
-		sprintf(path, "%s%d", PARENT_DIR, i);
-		write_iovec[i].file = vfile_from_path(path);
-		write_iovec[i].is_creation = true;
+		char* path = (char*) malloc(sizeof(PARENT_DIR) + sizeof(char) + 1);
+		strcpy(path, PARENT_DIR);
+		strcat(path, &base);
+	}
+
+	vfile* files = vec_open_simple(paths, N, O_WRONLY | O_CREAT, 0644);
+	for(i = 0; i < N; i++){
+		write_iovec[i].file = files[i];
 		write_iovec[i].offset = 0;
 		write_iovec[i].length = strlen(data);
 		write_iovec[i].data = (char*) data;
+		write_iovec[i].is_write_stable = true;
 	}
-
+	
 	if(atoi(argv[2]) == 1){
 		gettimeofday(&start, NULL);
-		res = vec_write(write_iovec, N, true);
+		res = vec_write(write_iovec, N, false);
 		gettimeofday(&end, NULL);
 	}else{
 		gettimeofday(&start, NULL);
 		for(i = 0; i < N; i++){
-			res = vec_write(write_iovec+i, 1, true);
+			res = vec_write(write_iovec+i, 1, false);
 		}
 		gettimeofday(&end, NULL);
 	}
+	vec_close(files, N);
 
 	/* Write the file using NFS compounds; nfs4_writev() will open the file
 	 * with CREATION flag, write to it, and then close it. */

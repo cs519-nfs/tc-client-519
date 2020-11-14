@@ -65,6 +65,7 @@ add_tc_binary(tc_test_openread)
 
 add_tc_binary(tc_test_read)
 add_tc_binary(tc_test_write)
+add_tc_binary(tc_test_writev)
 add_tc_binary(tc_test_mkdir)
 add_tc_binary(tc_test_mkdirs)
 add_tc_binary(tc_test_listdirs)

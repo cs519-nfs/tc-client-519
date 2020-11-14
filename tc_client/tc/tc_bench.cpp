@@ -30,6 +30,7 @@
 
 #include <string>
 #include <vector>
+#include <iostream>
 
 using std::vector;
 using namespace benchmark;
@@ -593,7 +594,7 @@ int main(int argc, char **argv)
 {
 	benchmark::Initialize(&argc, argv);
 	gflags::ParseCommandLineFlags(&argc, &argv, true);
-	void *context = SetUp(FLAGS_tc);
+	void *context = SetUp(false);
 	sca_chdir("/vfs0");
 	benchmark::RunSpecifiedBenchmarks();
 	TearDown(context);

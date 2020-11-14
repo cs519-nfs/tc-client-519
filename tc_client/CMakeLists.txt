@@ -119,7 +119,7 @@ set(CPACK_COMPONENT_DAEMON_DISPLAY_NAME "NFS-Ganesha daemon")
 include(${CMAKE_SOURCE_DIR}/cmake/cpack_config.cmake)
 include(CPack)
 
-# Now create a useable specfile²
+# Now create a useable specfileï¿½
 configure_file(
   "${PROJECT_SOURCE_DIR}/nfs-ganesha.spec-in.cmake"
   "${PROJECT_SOURCE_DIR}/nfs-ganesha.spec"

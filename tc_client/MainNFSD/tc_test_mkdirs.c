@@ -49,20 +49,26 @@
 static char tc_config_path[PATH_MAX];
 
 #define DEFAULT_LOG_FILE "/tmp/tc_test_mkdirs.log"
+#define PARENT_DIR "/vfs0/dirs/"
 
 int main(int argc, char *argv[])
 {
 	void *context = NULL;
-	const int N = 5;
+	const int N = atoi(argv[1]);
 	struct vattrs dirs[N];
 	char *path;
 	vres res;
 	int i;
 	int rc;
 	slice_t leaf;
-	const char *DIR_PATHS[] = { "/vfs0/dirs/a", "/vfs0/dirs/b",
-				    "/vfs0/dirs/c", "/vfs0/dirs/d",
-				    "/vfs0/dirs/e" };
+	char *DIR_PATHS[N];
+
+	for(i = 0; i < N; i++){
+		char base = (char) i + 'a';
+		DIR_PATHS[i] = (char*) malloc(sizeof(PARENT_DIR) + sizeof(char) + 1);
+		strcpy(DIR_PATHS[i], PARENT_DIR);
+		strcat(DIR_PATHS[i], &base);
+	}
 
 	/* Initialize TC services and daemons */
 	context = vinit(get_tc_config_file(tc_config_path, PATH_MAX),
@@ -97,7 +103,13 @@ int main(int argc, char *argv[])
 		dirs[i].file.type = VFILE_CURRENT;
 	}
 
+	struct timeval start, end;
+	gettimeofday(&start, NULL);
 	res = vec_mkdir(dirs, N, false);
+	gettimeofday(&end, NULL);
+
+	long elapsed = ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec);
+	fprintf(stdout, "Elapsed Time: %ld\n", elapsed);
 
 	/* Check results. */
 	if (vokay(res)) {
@@ -109,6 +121,10 @@ int main(int argc, char *argv[])
 
 exit:
 	vdeinit(context);
+	
+	for(i = 0; i < N; i++){
+		free(DIR_PATHS[i]);
+	}
 
 	return res.err_no;
 }
