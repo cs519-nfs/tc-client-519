@@ -7,8 +7,8 @@ num_iters=(128 512 256 1024)
 for type in {0..1};
 do
     for num in ${num_iters[@]};
-    echo "Data for: $num files for version: $type"
     do
+    echo "Data for: $num files for version: $type"
         for i in {1..5};
         do
             ./tc_test_writev $num $type $i
