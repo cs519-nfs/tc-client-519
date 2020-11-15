@@ -1,0 +1,16 @@
+echo "Gathering data "
+echo "--------------------------"
+sleep 2
+num_iters=(128 256 512 1024)
+# 1 = big vector
+# 0 = multiple vectors
+
+for num in ${num_iters[@]};
+do
+echo "Data for: $num files"
+	for i in {1..5};
+	do
+		./tc_test_rw $num
+	done
+	sudo rm /tcserver/test* 
+done
