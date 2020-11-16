@@ -160,10 +160,13 @@ into the debug/MainNFSD directory:
 [tc_client/gdcopy.sh]
 
 Then run:
+```
 		sudo bash gather_data.sh
+```
 or:
+```
 		sudo bash gd_copy.sh
-
+```
 gather_data.sh runs tc_test_writev multiple times with different parameters which are mentioned in the report
 gdcopy.sh runs tc_test_rw in a similar fashion to gather_data.sh
 
