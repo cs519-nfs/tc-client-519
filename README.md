@@ -151,3 +151,41 @@ Looking forward to your git push notification :-)
 
 [vNFS-talk]: https://www.usenix.org/conference/fast17/technical-sessions/presentation/chen
 [vNFS-pdf]: http://www.fsl.cs.sunysb.edu/docs/nfs4perf/vnfs-fast17.pdf
+
+Running Test Files
+============
+After running the server and compiling the test files for the client, copy the following scripts
+into the debug/MainNFSD directory:
+[tc_client/gather_data.sh]
+[tc_client/gdcopy.sh]
+
+Then run:
+		sudo bash gather_data.sh
+or:
+		sudo bash gd_copy.sh
+
+gather_data.sh runs tc_test_writev multiple times with different parameters which are mentioned in the report
+gdcopy.sh runs tc_test_rw in a similar fashion to gather_data.sh
+
+Bugs
+============
+As mentioned in the report, there are a few reproducible bugs.
+After running the server, and compiling the test files for the client, run:
+
+		sudo ./tc_writev_no_vec 1 1 1
+
+The first parameter does not matter as long as it is >= 1 since it is just the number of requests
+(which will fail at request 0 anyway). The second chooses either compound vector or multiple vectors to send as
+requests. The third parameter is the important one as it enables/disables vector transactions. We are enabling it
+in this case, which will cause the server to crash and the client to hang.
+
+The second bug is produced through the same command but with the parameters 1 0 0. The client will claim that the files
+are written (they can also be read from within in the same program so they are clearly there) but when observing
+[/tcserver/test] the files are not visible. Using
+
+	ll /tcserver/test
+
+will show that there are definitely files in the directory. There may also be some garbage files in the debug/MainNFSD
+directory. The success message is also inconsistent as sometimes it will fail.
+Running the same command with the arguments 1 1 0 also works tentatively though some of the code will have to be
+uncommented to see this happening.
