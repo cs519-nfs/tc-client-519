@@ -170,16 +170,14 @@ gdcopy.sh runs tc_test_rw in a similar fashion to gather_data.sh
 Bugs
 ============
 As mentioned in the report, there are a few reproducible bugs.
-After running the server, and compiling the test files for the client, run:
+After running the server, and compiling the test files for the client, to reproduce the first bug run:
 
-		sudo ./tc_writev_no_vec 1 1 1
+		sudo ./tc_writev_no_vec 3 1 0 
 
-The first parameter does not matter as long as it is >= 1 since it is just the number of requests
-(which will fail at request 0 anyway). The second chooses either compound vector or multiple vectors to send as
-requests. The third parameter is the important one as it enables/disables vector transactions. We are enabling it
-in this case, which will cause the server to crash and the client to hang.
-
-The second bug is produced through the same command but with the parameters 1 0 0. The client will claim that the files
+The first parameter represents the number of requests, here we try 3 and 4 as sometimes the behaviour does not show itself
+if the number is too low. The second chooses either compound vector or multiple vectors to send as
+requests. The third parameter is the important one as it enables/disables vector transactions. We are disabling it
+in this case, which will begin to cause this strange behaviour. The client will occasionally claim that the files
 are written (they can also be read from within in the same program so they are clearly there) but when observing
 [/tcserver/test] the files are not visible. Using
 
@@ -189,3 +187,10 @@ will show that there are definitely files in the directory. There may also be so
 directory. The success message is also inconsistent as sometimes it will fail.
 Running the same command with the arguments 1 1 0 also works tentatively though some of the code will have to be
 uncommented to see this happening.
+
+The second bug is produced through the same command but with the parameters 1 1 1. This enables regular support 
+but this crashes the server. Unlike our other benchmark which does not use open and close, this one uses open 
+which may in part be the cause.
+
+The write and mkdir issues can be replicated manually.
+
