@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	int N = atoi(argv[1]);
 	int i;
 	void *context = NULL;
-	struct viovec write_iovec[N];
+	struct viovec write_iovec[N], read_iovec[N];
 	struct viovec write_iovec_multi;
 	struct timeval start, end;
 	vres res;
@@ -82,19 +82,24 @@ int main(int argc, char *argv[])
 
 	char* paths[N];
 	for(i = 0; i < N; i++){
-		char base = (char) i + 'a';
+		/*char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);*/
+		/*sprintf(path, "%s%d", PARENT_DIR, i);*/
+		/*paths[i] = path;*/
+		char base = (char) i + '1';
 		char* path = (char*) malloc(sizeof(PARENT_DIR) + sizeof(char) + 1);
 		strcpy(path, PARENT_DIR);
 		strcat(path, &base);
+		fprintf(stdout, "%s\n", path);
 	}
 
-	vfile* files = vec_open_simple(paths, N, O_WRONLY | O_CREAT, 0644);
+	vfile* files = vec_open_simple(paths, N, O_CREAT | O_WRONLY, 0644);
 	for(i = 0; i < N; i++){
 		write_iovec[i].file = files[i];
 		write_iovec[i].offset = 0;
 		write_iovec[i].length = strlen(data);
 		write_iovec[i].data = (char*) data;
 		write_iovec[i].is_write_stable = true;
+		fprintf(stdout, "%s\n", write_iovec[i].file.path);
 	}
 	
 	if(atoi(argv[2]) == 1){
@@ -108,6 +113,27 @@ int main(int argc, char *argv[])
 		}
 		gettimeofday(&end, NULL);
 	}
+
+	/*for(i = 0; i < N; i++){*/
+		/*read_iovec[i].file = files[i];*/
+		/*read_iovec[i].offset = 0;*/
+		/*read_iovec[i].length = strlen(data);*/
+		/*read_iovec[i].data = calloc(1, strlen(data) + 1);*/
+	/*}*/
+
+	/*if(atoi(argv[2]) == 1){*/
+                /*gettimeofday(&start, NULL);*/
+                /*res = vec_read(read_iovec, N, false);*/
+                /*gettimeofday(&end, NULL);*/
+    /*}else{*/
+                /*gettimeofday(&start, NULL);*/
+                /*for(i = 0; i < N; i++){*/
+                        /*res = vec_read(read_iovec+i, 1, false);*/
+			/*fprintf(stdout, "%s", read_iovec[i].data);*/
+				/*}*/
+                /*gettimeofday(&end, NULL);*/
+    /*}*/
+
 	vec_close(files, N);
 
 	/* Write the file using NFS compounds; nfs4_writev() will open the file

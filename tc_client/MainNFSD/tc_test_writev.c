@@ -77,7 +77,6 @@ int main(int argc, char *argv[])
 
 
 	for(i = 0; i < N; i++){
-		char base = (char) i + 'a';
 		char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
 		sprintf(path, "%s%d", PARENT_DIR, i);
 		write_iovec[i].file = vfile_from_path(path);
