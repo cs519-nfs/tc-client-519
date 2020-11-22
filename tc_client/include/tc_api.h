@@ -404,6 +404,14 @@ static inline bool tx_vec_write(struct viovec *writes, int count)
 	return vokay(vec_write(writes, count, true));
 }
 
+
+vres vec_read_write(struct viovec *generic, int count, bool is_transaction);
+
+static inline bool tx_vec_read_write(struct viovec *generic, int count)
+{
+	return vokay(vec_write(generic, count, true));
+}
+
 /**
  * The bitmap indicating the presence of file attributes.
  */

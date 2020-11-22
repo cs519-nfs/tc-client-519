@@ -251,6 +251,22 @@ vres vec_write(struct viovec *writes, int count, bool is_transaction)
 	return tcres;
 }
 
+vres vec_read_write(struct viovec *generic, int count, bool is_transaction)
+{
+	vres tcres;
+	puts("The read write has begun!");
+	TC_DECLARE_COUNTER(write);
+
+	TC_START_COUNTER(write);
+	if (TC_IMPL_IS_NFS4) {
+		tcres = nfs_writev(generic, count, is_transaction);
+	} else {
+		tcres = posix_writev(generic, count, is_transaction);
+	}
+	TC_STOP_COUNTER(write, count, vokay(tcres));
+
+	return tcres;
+}
 
 struct syminfo {
 	const char *src_path; // path of file to be checked for symlink; can be

@@ -502,6 +502,13 @@ vres nfs4_writev(struct viovec *iovs, int count, bool istxn,
 	return nfs4_do_iovec(iovs, count, istxn, nfs4_do_writev, old_attrs,
 			     new_attrs);
 }
+vres nfs4_read_writev(struct viovec *writes, int write_count,
+		   bool is_transaction, struct vattrs *old_attrs,
+		   struct vattrs *new_attrs){
+	puts("hello world!");
+	vres tcres = { .index = 0, .err_no = (int)ENOENT };
+	return tcres;
+}
 
 vfile *nfs4_openv(const char **paths, int count, int *flags, mode_t *modes,
 		    struct vattrs *attrs)

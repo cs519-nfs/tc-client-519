@@ -1317,6 +1317,11 @@ struct fsal_obj_ops {
 	vres (*vec_write)(struct viovec *iovs, int count,
 				struct vattrs *old_attrs,
 				struct vattrs *new_attrs);
+				
+/* Multiple read and writes within a single compound */
+	vres (*vec_read_write)(struct viovec *iovs, int count,
+				struct vattrs *old_attrs,
+				struct vattrs *new_attrs);
 
 	vres (*vec_open)(struct vattrs *attrs, int count, int *flags,
 			   stateid4 *sids);

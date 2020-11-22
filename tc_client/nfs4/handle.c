@@ -2659,6 +2659,13 @@ exit:
         return tcres;
 }
 
+
+static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
+			   struct vattrs *old_attrs, struct vattrs *new_attrs){
+	puts("I am not sure on what is currently happening.");
+	vres tcres = { 0 };
+}
+
 static inline uint32_t sca_open_flags_to_access(int flags)
 {
 	if ((flags & O_WRONLY) != 0) {
@@ -5027,6 +5034,7 @@ void fs_handle_ops_init(struct fsal_obj_ops *ops)
         ops->vec_readlink = tc_nfs4_readlinkv;
         ops->sca_chdir = tc_nfs4_chdir;
         ops->sca_getcwd = tc_nfs4_getcwd;
+	ops->vec_read_write = tc_nfs4_read_writev;
 	ops->tc_destroysession = fs_destroy_session;
 	ops->root_lookup = fs_root_lookup;
         ops->vec_open = tc_nfs4_openv;

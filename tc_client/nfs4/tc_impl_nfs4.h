@@ -66,6 +66,10 @@ vres nfs4_writev(struct viovec *writes, int write_count,
 		   bool is_transaction, struct vattrs *old_attrs,
 		   struct vattrs *new_attrs);
 
+vres nfs4_read_writev(struct viovec *writes, int write_count,
+		   bool is_transaction, struct vattrs *old_attrs,
+		   struct vattrs *new_attrs);
+
 /**
  * Open a list of files specified by paths
  *
