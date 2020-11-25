@@ -2431,24 +2431,25 @@ static vres tc_nfs4_readv(struct viovec *iovs, int count,
 	struct READ4resok *read_res;
 	int i = 0;      /* index of viovec */
 	int j = 0;      /* index of NFS operations */
-        const vfile *opened_file = NULL;
-        bool r;
-        int saved_opcnt;
-        const vfile *saved_file;
+	const vfile *opened_file = NULL;
+	bool r;
+	int saved_opcnt;
+	const vfile *saved_file;
 	char *fattr_blobs;
 	fattr_blobs = (char *)malloc(count * FATTR_BLOB_SZ);
 	int attr_count = 0;
 
 	LogDebug(COMPONENT_FSAL, "ktcread() called\n");
 
-        vreset_compound(true);
+    vreset_compound(true);
 
 	for (i = 0; i < count; ++i) {
 		saved_opcnt = opcnt;
 		saved_file = opened_file;
-		r = sca_open_file_if_necessary(&iovs[i].file, O_RDONLY,
-					       tc_auto_buf(64), NULL,
-					       &opened_file) &&
+		r = sca_open_file_if_necessary(
+			&iovs[i].file, 
+			O_RDONLY,
+			tc_auto_buf(64), NULL, &opened_file) &&
 		    tc_prepare_rdwr(&iovs[i], false, opened_file != NULL) &&
 		    tc_prepare_getattr(fattr_blobs + i * FATTR_BLOB_SZ,
 				       &fs_bitmap_getattr);
@@ -2472,37 +2473,37 @@ static vres tc_nfs4_readv(struct viovec *iovs, int count,
                 goto exit;
         }
 
-        /* No matter NFS failed or succeeded, we need to fill in results */
-        i = 0;
-        for (j = 0; j < opcnt; ++j) {
-                op_status = get_nfs4_op_status(&resoparray[j]);
-                if (op_status != NFS4_OK) {
-			iovs[i].is_failure = 1;
-			NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
-				 resoparray[j].resop);
-                        tcres = vfailure(i, nfsstat4_to_errno(op_status));
-                        goto exit;
-                }
-                if (resoparray[j].resop == NFS4_OP_READ) {
+	/* No matter NFS failed or succeeded, we need to fill in results */
+	i = 0;
+	for (j = 0; j < opcnt; ++j) {
+		op_status = get_nfs4_op_status(&resoparray[j]);
+		if (op_status != NFS4_OK) {
+		iovs[i].is_failure = 1;
+		NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
+			resoparray[j].resop);
+				tcres = vfailure(i, nfsstat4_to_errno(op_status));
+				goto exit;
+		}
+		if (resoparray[j].resop == NFS4_OP_READ) {
 			read_res = &resoparray[j]
-					.nfs_resop4_u.opread.READ4res_u.resok4;
-			iovs[i].length = read_res->data.data_len;
-			iovs[i].is_eof = read_res->eof;
-                        i++;
+						.nfs_resop4_u.opread.READ4res_u.resok4;
+						iovs[i].length = read_res->data.data_len;
+						iovs[i].is_eof = read_res->eof;
+			i++;
 		}
 		else if (resoparray[j].resop == NFS4_OP_GETATTR) {
-			fattr4_to_vattrs(
-                            &resoparray[j]
-                                 .nfs_resop4_u.opgetattr.GETATTR4res_u.resok4
-                                 .obj_attributes,
-                            attrs + attr_count);
-                        ++attr_count;
+		fattr4_to_vattrs(
+						&resoparray[j]
+						.nfs_resop4_u.opgetattr.GETATTR4res_u
+						.resok4.obj_attributes,
+						attrs + attr_count);
+			++attr_count;
 		}
 	}
 
 exit:
 	free(fattr_blobs);
-        return tcres;
+    return tcres;
 }
 
 static inline bool tc_prepare_rdwr(struct viovec *iov, bool write,
@@ -2554,25 +2555,25 @@ static vres tc_nfs4_writev(struct viovec *iovs, int count,
 			   struct vattrs *old_attrs, struct vattrs *new_attrs)
 {
 	vres tcres = { 0 };
-	int rc;
 	nfsstat4 op_status;
-        struct WRITE4resok *write_res = NULL;
+    struct WRITE4resok *write_res = NULL;
 	fattr4 *input_attr = NULL;
+	int rc;
 	int i = 0;      /* index of viovec */
 	int j = 0;      /* index of NFS operations */
-        const vfile *opened_file = NULL;
-        bool r;
-        int saved_opcnt = 0;
-        const vfile *saved_file;
-	char *fattr_blobs;
-        fattr_blobs = (char *)malloc(count * FATTR_BLOB_SZ);
+    int attr_count = 0;
+	int saved_opcnt = 0;
+	const vfile *opened_file = NULL;
+	const vfile *saved_file;
 	char *old_fattr_blobs;
+	char *fattr_blobs;
+	bool r;
+    fattr_blobs = (char *)malloc(count * FATTR_BLOB_SZ);
 	old_fattr_blobs = (char *)malloc(count * FATTR_BLOB_SZ);
-        int attr_count = 0;
 
 	LogDebug(COMPONENT_FSAL, "ktcwrite() called\n");
 
-        vreset_compound(true);
+    vreset_compound(true);
 
 	input_attr = calloc(count, sizeof(fattr4));
 
@@ -2601,7 +2602,7 @@ static vres tc_nfs4_writev(struct viovec *iovs, int count,
                 opened_file = NULL;
 	}
 
-        tcres.index = count;
+    tcres.index = count;
 	rc = fs_nfsv4_call(op_ctx->creds, &tcres.err_no);
 	if (rc != RPC_SUCCESS) {
 		NFS4_ERR("fs_nfsv4_call() returned error: %d (%s)\n", rc,
@@ -2610,44 +2611,44 @@ static vres tc_nfs4_writev(struct viovec *iovs, int count,
                 goto exit;
 	}
 
-        /* No matter failure or success, we need to fill in results */
-        i = 0;
-        for (j = 0; j < opcnt; ++j) {
-                op_status = get_nfs4_op_status(&resoparray[j]);
-                if (op_status != NFS4_OK) {
-                        iovs[i].is_failure = 1;
-                        tcres = vfailure(i, nfsstat4_to_errno(op_status));
-			NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
-				 resoparray[j].resop);
-                        goto exit;
-                }
-                if (resoparray[j].resop == NFS4_OP_WRITE) {
+	/* No matter failure or success, we need to fill in results */
+	i = 0;
+	for (j = 0; j < opcnt; ++j) {
+		op_status = get_nfs4_op_status(&resoparray[j]);
+		if (op_status != NFS4_OK) {
+			iovs[i].is_failure = 1;
+			tcres = vfailure(i, nfsstat4_to_errno(op_status));
+				NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
+				resoparray[j].resop);
+			goto exit;
+		}
+		if (resoparray[j].resop == NFS4_OP_WRITE) {
 			write_res =
-			    &resoparray[j]
-				 .nfs_resop4_u.opwrite.WRITE4res_u.resok4;
+				&resoparray[j]
+				.nfs_resop4_u.opwrite.WRITE4res_u.resok4;
 			iovs[i].length = write_res->count;
 			iovs[i].is_write_stable =
-			    (write_res->committed != UNSTABLE4);
+				(write_res->committed != UNSTABLE4);
 			i++;
-                }
+		}
 		else if (resoparray[j].resop == NFS4_OP_GETATTR) {
 			if (attr_count % 2 == 1) {
 				fattr4_to_vattrs(
-				    &resoparray[j]
-					 .nfs_resop4_u.opgetattr.GETATTR4res_u
-					 .resok4.obj_attributes,
-				    new_attrs + attr_count / 2);
+					&resoparray[j]
+						.nfs_resop4_u.opgetattr.GETATTR4res_u
+						.resok4.obj_attributes,
+					new_attrs + attr_count / 2);
 			}
 			else {
 				fattr4_to_vattrs(
-				    &resoparray[j]
-					 .nfs_resop4_u.opgetattr.GETATTR4res_u
-					 .resok4.obj_attributes,
-				    old_attrs + attr_count / 2);
+					&resoparray[j]
+						.nfs_resop4_u.opgetattr.GETATTR4res_u
+						.resok4.obj_attributes,
+					old_attrs + attr_count / 2);
 			}
-                        ++attr_count;
+			++attr_count;
 		}
-        }
+	}
 
 exit:
 	for (i = 0; i < count; ++i) {
@@ -2656,14 +2657,118 @@ exit:
 	free(input_attr);
 	free(fattr_blobs);
 	free(old_fattr_blobs);
-        return tcres;
+    return tcres;
 }
 
 
 static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
 			   struct vattrs *old_attrs, struct vattrs *new_attrs){
-	puts("I am not sure on what is currently happening.");
+	puts("Performing actual transaction message to server.");
 	vres tcres = { 0 };
+	nfsstat4 op_status;
+    struct WRITE4resok *write_res = NULL;
+	fattr4 *input_attr = NULL;
+	int rc;
+	int i = 0;      /* index of viovec */
+	int j = 0;      /* index of NFS operations */
+    int attr_count = 0;
+	int saved_opcnt = 0;
+	const vfile *opened_file = NULL;
+	const vfile *saved_file;
+	char *old_fattr_blobs;
+	char *fattr_blobs;
+	bool r;
+    fattr_blobs = (char *)malloc(count * FATTR_BLOB_SZ);
+	old_fattr_blobs = (char *)malloc(count * FATTR_BLOB_SZ);
+
+
+	vreset_compound(true);
+
+	input_attr = calloc(count, sizeof(fattr4));
+
+	//Open each file if necessary, provide the WR_ONLY flag along with it
+	for (i = 0; i < count; ++i) {
+		saved_opcnt = opcnt;
+		saved_file = opened_file;
+		//If is_creation is passed in, create the file
+		r = sca_open_file_if_necessary(
+			&iovs[i].file,
+			O_WRONLY | (iovs[i].is_creation ? O_CREAT : 0),
+			tc_auto_buf(64), &input_attr[i], &opened_file) &&
+		    tc_prepare_getattr(old_fattr_blobs + i * FATTR_BLOB_SZ,
+				       &fs_bitmap_getattr) &&
+		    tc_prepare_rdwr(&iovs[i], true, opened_file != NULL) &&
+		    tc_prepare_getattr(fattr_blobs + i * FATTR_BLOB_SZ,
+				       &fs_bitmap_getattr);
+		if (!r || !tc_has_enough_ops(1)) { // reserve for CLOSE
+			opcnt = saved_opcnt;
+			opened_file = saved_file;
+			count = i;
+			break;
+		}
+	}
+
+	if (opened_file) {
+		COMPOUNDV4_ARG_ADD_OP_CLOSE(opcnt, argoparray, (&CURSID));
+                opened_file = NULL;
+	}
+
+    tcres.index = count;
+	rc = fs_nfsv4_call(op_ctx->creds, &tcres.err_no);
+	if (rc != RPC_SUCCESS) {
+		NFS4_ERR("fs_nfsv4_call() returned error: %d (%s)\n", rc,
+			 strerror(rc));
+                tcres = vfailure(0, rc);
+                goto exit;
+	}
+	puts("Success!");
+	/* We need to find a method to fill in results
+	i = 0;
+	for (j = 0; j < opcnt; ++j) {
+		op_status = get_nfs4_op_status(&resoparray[j]);
+		if (op_status != NFS4_OK) {
+			iovs[i].is_failure = 1;
+			tcres = vfailure(i, nfsstat4_to_errno(op_status));
+				NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
+				resoparray[j].resop);
+			goto exit;
+		}
+		if (resoparray[j].resop == NFS4_OP_WRITE) {
+			write_res =
+				&resoparray[j]
+				.nfs_resop4_u.opwrite.WRITE4res_u.resok4;
+			iovs[i].length = write_res->count;
+			iovs[i].is_write_stable =
+				(write_res->committed != UNSTABLE4);
+			i++;
+		}
+		else if (resoparray[j].resop == NFS4_OP_GETATTR) {
+			if (attr_count % 2 == 1) {
+				fattr4_to_vattrs(
+					&resoparray[j]
+						.nfs_resop4_u.opgetattr.GETATTR4res_u
+						.resok4.obj_attributes,
+					new_attrs + attr_count / 2);
+			}
+			else {
+				fattr4_to_vattrs(
+					&resoparray[j]
+						.nfs_resop4_u.opgetattr.GETATTR4res_u
+						.resok4.obj_attributes,
+					old_attrs + attr_count / 2);
+			}
+			++attr_count;
+		}
+	}
+	*/
+exit:
+	for (i = 0; i < count; ++i) {
+		nfs4_Fattr_Free(&input_attr[i]);
+	}
+	free(input_attr);
+	free(fattr_blobs);
+	free(old_fattr_blobs);
+    return tcres;
 }
 
 static inline uint32_t sca_open_flags_to_access(int flags)

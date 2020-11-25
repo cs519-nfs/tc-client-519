@@ -60,6 +60,8 @@ vres nfs_readlinkv(const char **paths, char **bufs, size_t *bufsizes,
 
 vres nfs_readv(struct viovec *iovs, int count, bool istxn);
 
+vres nfs_read_writev(struct viovec *operations, int operation_count, bool is_transaction);
+
 vres nfs_lgetattrsv(struct vattrs *attrs, int count, bool is_transaction);
 
 int nfs_chdir(const char *path);

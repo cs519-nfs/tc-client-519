@@ -509,6 +509,25 @@ vres nfs_writev(struct viovec *writes, int write_count, bool is_transaction)
 	return tcres;
 }
 
+vres nfs_read_writev(struct viovec *operations, int operation_count, bool is_transaction){
+	puts("Attempting to perform read writes.");
+	vector<struct vattrs> attrs(operation_count);     // attrs after operations
+	vector<struct vattrs> old_attrs(operation_count); // attrs before operations
+	vector<vfile> saved_tcfs =
+	    nfs_updateIovec_FilenameToFh(operations, operation_count);
+	//This is the read call
+	// tcres = nfs4_readv(operations, operation_count, istxn, attrs.data());
+	//This is the write call, for now I just make the write call and return to see everything still works
+	vres tcres = nfs4_read_writev(operations, operation_count, is_transaction,
+			    old_attrs.data(), attrs.data());
+
+
+	if(vokay(tcres)){
+		//Update the cache
+	}
+	return tcres;
+}
+
 static char *join_path(const char *parent, const char *child)
 {
 	if (child == nullptr) {

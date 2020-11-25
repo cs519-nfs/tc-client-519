@@ -17,7 +17,7 @@
 static char tc_config_path[PATH_MAX];
 
 #define DEFAULT_LOG_FILE "/tmp/tc_test_writev.log"
-#define PARENT_DIR "/vfs0/test"
+#define PARENT_DIR "/vfs0/new_test/"
 
 int main(int argc, char** argv){
 	
@@ -41,7 +41,7 @@ int main(int argc, char** argv){
 		char base = (char) i + 'a';
 		char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
 		sprintf(path, "%s%d", PARENT_DIR, i);
-
+		puts(path);
 		write_iovec[i].file = vfile_from_path(path);
 		write_iovec[i].is_creation = true;
 		write_iovec[i].offset = 0;
@@ -57,14 +57,14 @@ int main(int argc, char** argv){
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
 	for(i = 0; i < N; i++){
-		wres = vec_read_write(write_iovec, 1, true);
+		wres = vec_read_write(write_iovec+i, 1, true);
 	}
 	gettimeofday(&end, NULL);
 
 	long elapsed = ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec);
 	fprintf(stdout, "Elapsed Time: %ld\n", elapsed);
 
-	if(vokay(wres) && vokay(rres)){
+	if(vokay(wres)){
 		fprintf(stderr, "Successfully wrote/read all %d files\n", N);
 	}else{
 		fprintf(stderr, "Failed to write/read %d files\n", N);

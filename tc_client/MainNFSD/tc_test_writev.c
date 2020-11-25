@@ -67,7 +67,7 @@ int main(int argc, char *argv[])
 	/* Initialize TC services and daemons */
 	context = vinit(get_tc_config_file(tc_config_path, PATH_MAX),
 			DEFAULT_LOG_FILE, 77);
-
+	puts(tc_config_path);
 	if (context == NULL) {
 		NFS4_ERR("Error while initializing tc_client using config "
 			 "file: %s; see log at %s",
@@ -79,6 +79,7 @@ int main(int argc, char *argv[])
 	for(i = 0; i < N; i++){
 		char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
 		sprintf(path, "%s%d", PARENT_DIR, i);
+		puts(path);
 		write_iovec[i].file = vfile_from_path(path);
 		write_iovec[i].is_creation = true;
 		write_iovec[i].offset = 0;
