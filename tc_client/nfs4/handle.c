@@ -2690,16 +2690,28 @@ static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
 	for (i = 0; i < count; ++i) {
 		saved_opcnt = opcnt;
 		saved_file = opened_file;
-		//If is_creation is passed in, create the file
-		r = sca_open_file_if_necessary(
-			&iovs[i].file,
-			O_WRONLY | (iovs[i].is_creation ? O_CREAT : 0),
-			tc_auto_buf(64), &input_attr[i], &opened_file) &&
-		    tc_prepare_getattr(old_fattr_blobs + i * FATTR_BLOB_SZ,
-				       &fs_bitmap_getattr) &&
-		    tc_prepare_rdwr(&iovs[i], true, opened_file != NULL) &&
-		    tc_prepare_getattr(fattr_blobs + i * FATTR_BLOB_SZ,
-				       &fs_bitmap_getattr);
+		if(iovs[i].type == VECTOR_WRITE_OP){
+			//If is_creation is passed in, create the file
+			r = sca_open_file_if_necessary(
+				&iovs[i].file,
+				O_WRONLY | (iovs[i].is_creation ? O_CREAT : 0),
+				tc_auto_buf(64), &input_attr[i], &opened_file) &&
+				tc_prepare_getattr(old_fattr_blobs + i * FATTR_BLOB_SZ,
+						&fs_bitmap_getattr) &&
+				tc_prepare_rdwr(&iovs[i], true, opened_file != NULL) &&
+				tc_prepare_getattr(fattr_blobs + i * FATTR_BLOB_SZ,
+						&fs_bitmap_getattr);
+		}else if(iovs[i].type == VECTOR_READ_OP){
+			r = sca_open_file_if_necessary(
+				&iovs[i].file, 
+				O_RDONLY,
+				tc_auto_buf(64), NULL, &opened_file) &&
+				tc_prepare_rdwr(&iovs[i], false, opened_file != NULL) &&
+				tc_prepare_getattr(fattr_blobs + i * FATTR_BLOB_SZ,
+						&fs_bitmap_getattr);
+		}
+			
+
 		if (!r || !tc_has_enough_ops(1)) { // reserve for CLOSE
 			opcnt = saved_opcnt;
 			opened_file = saved_file;

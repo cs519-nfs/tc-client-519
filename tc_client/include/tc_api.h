@@ -211,7 +211,8 @@ char *sca_getcwd(void);
  * A special offset indicates the current offset of the file descriptor.
  */
 #define TC_OFFSET_CUR (SIZE_MAX-1)
-
+#define VECTOR_READ_OP (1)
+#define VECTOR_WRITE_OP (2)
 /**
  * Represents an I/O vector of a file.
  *
@@ -238,7 +239,7 @@ struct viovec
 	 * OUT: data successfully read
 	 */
 	char *data;
-
+	int type;
 	unsigned int is_creation : 1; /* IN: create file if not exist? */
 	unsigned int is_direct_io : 1;/* IN: is direct I/O or not */
 	unsigned int is_failure : 1;  /* OUT: is this I/O a failure? */
