@@ -254,12 +254,12 @@ vres vec_write(struct viovec *writes, int count, bool is_transaction)
 vres vec_read_write(struct viovec *generic, int count, bool is_transaction)
 {
 	vres tcres;
-	puts("The read write has begun!");
+	// puts("The read write has begun!");
 	TC_DECLARE_COUNTER(write);
 
 	TC_START_COUNTER(write);
 	if (TC_IMPL_IS_NFS4) {
-		puts("Performing NFSv4 Actions.");
+		// puts("Performing NFSv4 Actions.");
 		tcres = nfs_read_writev(generic, count, is_transaction);
 	} else {
 		tcres = posix_writev(generic, count, is_transaction);

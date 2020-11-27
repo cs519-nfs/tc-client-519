@@ -2663,10 +2663,11 @@ exit:
 
 static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
 			   struct vattrs *old_attrs, struct vattrs *new_attrs){
-	puts("Performing actual transaction message to server.");
+	// puts("Performing actual transaction message to server.");
 	vres tcres = { 0 };
 	nfsstat4 op_status;
     struct WRITE4resok *write_res = NULL;
+	struct READ4resok *read_res;
 	fattr4 *input_attr = NULL;
 	int rc;
 	int i = 0;      /* index of viovec */
@@ -2733,17 +2734,18 @@ static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
                 tcres = vfailure(0, rc);
                 goto exit;
 	}
-	puts("Success!");
-	/* We need to find a method to fill in results
+	// puts("Success!");
+	// Fill in results regardless of if it was successful or not
+	
 	i = 0;
 	for (j = 0; j < opcnt; ++j) {
 		op_status = get_nfs4_op_status(&resoparray[j]);
 		if (op_status != NFS4_OK) {
 			iovs[i].is_failure = 1;
-			tcres = vfailure(i, nfsstat4_to_errno(op_status));
-				NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
+			NFS4_ERR("the %d-th viovec failed (NFS op: %d)", i,
 				resoparray[j].resop);
-			goto exit;
+					tcres = vfailure(i, nfsstat4_to_errno(op_status));
+					goto exit;
 		}
 		if (resoparray[j].resop == NFS4_OP_WRITE) {
 			write_res =
@@ -2752,6 +2754,13 @@ static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
 			iovs[i].length = write_res->count;
 			iovs[i].is_write_stable =
 				(write_res->committed != UNSTABLE4);
+			i++;
+		}
+		else if (resoparray[j].resop == NFS4_OP_READ) {
+			read_res = &resoparray[j]
+						.nfs_resop4_u.opread.READ4res_u.resok4;
+						iovs[i].length = read_res->data.data_len;
+						iovs[i].is_eof = read_res->eof;
 			i++;
 		}
 		else if (resoparray[j].resop == NFS4_OP_GETATTR) {
@@ -2772,7 +2781,7 @@ static vres tc_nfs4_read_writev(struct viovec *iovs, int count,
 			++attr_count;
 		}
 	}
-	*/
+	
 exit:
 	for (i = 0; i < count; ++i) {
 		nfs4_Fattr_Free(&input_attr[i]);

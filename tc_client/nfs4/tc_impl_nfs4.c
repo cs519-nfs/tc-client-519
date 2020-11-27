@@ -520,7 +520,7 @@ vres nfs4_do_read_writev(struct viovec *iovs, int write_count, bool istxn,
 		return tcres;
 	}
 
-	puts("nfs4_do_read_writev() called");
+	// puts("nfs4_do_read_writev() called");
 
 	for (finished = 0; finished < write_count; finished += tcres.index) {
 		tcres = export->fsal_export->obj_ops->vec_read_write(
@@ -537,7 +537,7 @@ vres nfs4_do_read_writev(struct viovec *iovs, int write_count, bool istxn,
 
 vres nfs4_read_writev(struct viovec *iovs, int count, bool istxn,
 		 struct vattrs *old_attrs, struct vattrs *new_attrs){
-	puts("Now calling nfs4 specific read_writev");
+	// puts("Now calling nfs4 specific read_writev");
 	return nfs4_do_iovec(iovs, count, istxn, nfs4_do_read_writev, old_attrs,
 			     new_attrs);
 }

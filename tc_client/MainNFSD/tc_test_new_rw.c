@@ -13,7 +13,7 @@
 #include <libgen.h>		/* used for 'dirname' */
 #include "../nfs4/nfs4_util.h"
 #include "tc_helper.h"
-
+// #define DEBUG
 static char tc_config_path[PATH_MAX];
 
 #define DEFAULT_LOG_FILE "/tmp/tc_test_writev.log"
@@ -38,12 +38,15 @@ int main(int argc, char** argv){
 	}
 	char* prior_path;
 	for(i = 0; i < N; i++){
-		char base = (char) i + 'a';
+		char base = (char) i/2 + 'a';
 		char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
 		sprintf(path, "%s%d", PARENT_DIR, i);
+#ifdef DEBUG
 		puts(path);
+#endif
 		if(i%2 == 0){
 			//create the file
+			// puts(path);
 			iovec[i].file = vfile_from_path(path);
 			iovec[i].is_creation = true;
 			iovec[i].offset = 0;
@@ -63,27 +66,31 @@ int main(int argc, char** argv){
 
 	struct timeval start, end;
 	gettimeofday(&start, NULL);
-	// for(i = 0; i < N; i++){
-	// 	wres = vec_read_write(iovec+i, 1, true);
-	// 	if(!vokay(wres)){
-	// 		printf("An error has occured with operation: %d", i);
-	// 	}else if(i%2 != 0){
-	// 		//If it is both okay and an odd operaiton print the read result
-	// 		printf("This is the data that was read in: %s\n", iovec[i].data);
-	// 	}
 
-	// }
+// 	for(i = 0; i < N; i++){
+// 		res = vec_read_write(iovec+i, 1, true);
+// #ifdef DEBUG
+// 		if(!vokay(wres)){
+// 			printf("An error has occured with operation: %d", i);
+// 		}else if(i%2 != 0){
+// 			//If it is both okay and an odd operaiton print the read result
+// 			printf("This is the data that was read in: %s\n", iovec[i].data);
+// 		}
+// #endif
+// 	}
 	res = vec_read_write(iovec, N, true);
 	// if(!vokay(res)){
 
 	// }
 	gettimeofday(&end, NULL);
+#ifdef DEBUG
 	for(i = 0; i < N; i++){
 		if(i%2 != 0){
 			//Print the read result
 			printf("This is the read result: %s\n", iovec[i].data);
 		}
 	} 
+#endif
 	long elapsed = ((end.tv_sec - start.tv_sec) * 1000000) + (end.tv_usec - start.tv_usec);
 	fprintf(stdout, "Elapsed Time: %ld\n", elapsed);
 

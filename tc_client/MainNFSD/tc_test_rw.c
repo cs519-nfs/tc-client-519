@@ -13,7 +13,7 @@
 #include <libgen.h>		/* used for 'dirname' */
 #include "../nfs4/nfs4_util.h"
 #include "tc_helper.h"
-
+// #define DEBUG
 static char tc_config_path[PATH_MAX];
 
 #define DEFAULT_LOG_FILE "/tmp/tc_test_writev.log"
@@ -41,7 +41,9 @@ int main(int argc, char** argv){
 		char base = (char) i + 'a';
 		char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
 		sprintf(path, "%s%d", PARENT_DIR, i);
+#ifdef DEBUG
 		puts(path);
+#endif
 		write_iovec[i].file = vfile_from_path(path);
 		write_iovec[i].is_creation = true;
 		write_iovec[i].offset = 0;
@@ -59,12 +61,12 @@ int main(int argc, char** argv){
 	for(i = 0; i < N; i++){
 		wres = vec_write(write_iovec+i, 1, true);
 		rres = vec_read(read_iovec+i, 1, true);
-		if(!vokay(rres)){
-			printf("Error reading: %d\n", i);
-		}
-		if(!vokay(wres)){
-			printf("Error writing: %d\n", i);
-		}
+		// if(!vokay(rres)){
+		// 	printf("Error reading: %d\n", i);
+		// }
+		// if(!vokay(wres)){
+		// 	printf("Error writing: %d\n", i);
+		// }
 	}
 	gettimeofday(&end, NULL);
 
