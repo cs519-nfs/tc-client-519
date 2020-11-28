@@ -14,7 +14,7 @@
 #include "../nfs4/nfs4_util.h"
 #include "tc_helper.h"
 #define MINIMAL_OUTPUT
-#define DEBUG
+// #define DEBUG
 static char tc_config_path[PATH_MAX];
 
 #define DEFAULT_LOG_FILE "/tmp/rw_benchmark_1.log"
@@ -32,10 +32,15 @@ int main(int argc, char** argv){
 	int N = atoi(argv[1]);
 	int type = atoi(argv[2]);
 	int spacing = atoi(argv[3]);
-	int i, j;
+	long i, j;
 	void *context = NULL;
-	struct viovec iovec[N*2*spacing];
-	printf("Amount I am using: %d\n", N*4*spacing);
+	long vector_count = N*2*spacing;
+
+	struct viovec iovec[vector_count];
+
+#ifdef DEBUG
+	printf("Amount I am using: %ld\n", vector_count);
+#endif
 
 	vres wres, rres, res;
 	const char *data = "hello world";
@@ -50,13 +55,15 @@ int main(int argc, char** argv){
 	}
 
 	char * prior_paths[spacing];
-	for(i = 0; i < (N+spacing)*2;){
+	for(i = 0; i < vector_count;){
 		int loc_to_consider = i/2;
-		printf("Loop: %d\n", i);
+#ifdef DEBUG
+		printf("Loop: %ld\n", i);
+#endif
 		//Create the write vector
 		for(j = 0; j<spacing; j++){
 			int location = loc_to_consider+j;
-			// char base = (char) location + 'a';
+			//char base = (char) location + 'a';
 			char* path = (char*) calloc(1, sizeof(PARENT_DIR) + sizeof(char)*10 + 1);
 			sprintf(path, "%s%d", PARENT_DIR, location);
 #ifdef DEBUG
@@ -70,9 +77,14 @@ int main(int argc, char** argv){
 			iovec[i].type = VECTOR_WRITE_OP;
 			prior_paths[j] = path;
 			i++;
-
+#ifdef DEBUG
+			printf("i: %ld \n", i);
+#endif
 		}
+
+#ifdef DEBUG
 		puts("Write done.");
+#endif
 		//and the read vector
 		for(j = 0; j<spacing; j++){
 			char* path = prior_paths[j];
@@ -85,24 +97,28 @@ int main(int argc, char** argv){
 			iovec[i].data = calloc(1, strlen(data) + 1);
 			iovec[i].type = VECTOR_READ_OP;
 			i++;
-			printf("i: %d \n", i);
+#ifdef DEBUG
+			printf("i: %ld \n", i);
+#endif
 		}
+#ifdef DEBUG
 		puts("Read done.");
+#endif
 	}
-	puts("Hi");
 	struct timeval start, end;
 	if(type){
 		gettimeofday(&start, NULL);
-		res = vec_read_write(iovec, (N+spacing)*2, true);
+		res = vec_read_write(iovec, vector_count, true);
 		gettimeofday(&end, NULL);
 	}else{
 		//Test basic seperate vectors
 		gettimeofday(&start, NULL);
-		// for(i = 0; i < N*2; ++i){
-		// 	wres = vec_write(iovec+i, 1, true);
-		// 	i++;
-		// 	rres = vec_read(iovec+i, 1, true);
-		// }
+		for(i = 0; i < vector_count; ){
+			wres = vec_write(iovec+i, spacing, true);
+			i += spacing;
+			rres = vec_read(iovec+i, spacing, true);
+			i += spacing;
+		}
 		gettimeofday(&end, NULL);
 	}
 
