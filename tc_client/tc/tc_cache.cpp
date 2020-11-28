@@ -510,7 +510,7 @@ vres nfs_writev(struct viovec *writes, int write_count, bool is_transaction)
 }
 
 vres nfs_read_writev(struct viovec *operations, int operation_count, bool is_transaction){
-	puts("Attempting to perform read writes.");
+	// puts("Attempting to perform read writes.");
 	vector<struct vattrs> attrs(operation_count);     // attrs after operations
 	vector<struct vattrs> old_attrs(operation_count); // attrs before operations
 	vector<vfile> saved_tcfs =
