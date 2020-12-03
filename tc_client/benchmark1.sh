@@ -3,7 +3,7 @@ echo "Benchmarking"
 echo "--------------------"
 batches=(128 256 512 1024)
 separations=(1 10 20 40)
-path="~/fsl-tc-client/tc-client/MainNFSD/alice.txt"
+path="alice.txt"
 
 benchmark () {
 	sum=0
