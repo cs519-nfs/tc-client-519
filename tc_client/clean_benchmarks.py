@@ -1,12 +1,17 @@
 import re
-
+batches = [128, 256, 512, 1024]
+batch_to_loc = {
+    128: 0,
+    256: 1,
+    512: 2,
+    1024: 3
+}
 def clean_average(file):
     benchmarks = [{}, {}, {}]
     with open(file) as f:
         f.readline()
         f.readline()
         
-        batches = [128, 256, 512, 1024]
         separations = [1, 10, 20, 40]
         type = 0
         batch = 0
@@ -43,18 +48,28 @@ def clean_average(file):
 #type, batch, sep
 def dump_to_file(benchmark, name):
     
-    l = []
+    batch_groups = [[],[],[],[]]
     for k in benchmark.keys():
         for k2 in benchmark.keys():
             if k is not k2:
                 if k[1] == k2[1] and k[2] == k2[2]:
-                    l.append((k, benchmark[k], k2, benchmark[k2]))
+                    index = batch_to_loc[k[1]]
+                    if k[0] == 0:
+                        batch_groups[index].append((k, benchmark[k], k2, benchmark[k2]))
+                    else:
+                        batch_groups[index].append((k2, benchmark[k2], k, benchmark[k]))
+
                     benchmark.pop(k)
                     benchmark.pop(k2)
+    
+
+    for batch, i in zip(batch_groups, range(len(l))):
+        batch_groups[i] = sorted(batch, key=lambda x: x[-2][-1])
 
     with open(name+".txt", 'w+') as f:
-        for x in l:
-            f.write(str(x) + "\n")
+        for batch in batch_groups:
+            for entry in batch:
+                f.write(str(entry) + "\n")
 
 l = []
 b11, b12, b13 = clean_average("benchmark1.txt")
