@@ -63,7 +63,7 @@ def dump_to_file(benchmark, name):
                     benchmark.pop(k2)
     
 
-    for batch, i in zip(batch_groups, range(len(l))):
+    for batch, i in zip(batch_groups, range(len(batch_groups))):
         batch_groups[i] = sorted(batch, key=lambda x: x[-2][-1])
 
     with open(name+".txt", 'w+') as f:
