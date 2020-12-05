@@ -49,6 +49,8 @@ def dump_to_file(benchmark, name):
             if k is not k2:
                 if k[1] == k2[1] and k[2] == k2[2]:
                     l.append((k, benchmark[k], k2, benchmark[k2]))
+                    benchmark.pop(k)
+                    benchmark.pop(k2)
 
     with open(name+".txt", 'w+') as f:
         for x in l:
