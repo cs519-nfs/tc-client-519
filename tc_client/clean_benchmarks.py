@@ -46,7 +46,7 @@ def clean_average(file):
     return benchmarks[0], benchmarks[1], benchmarks[2]
 
 #type, batch, sep
-def dump_to_file(benchmark, name):
+def dump_to_file(benchmark, name, calc_diff):
     
     batch_groups = [[],[],[],[]]
     for k in benchmark.keys():
@@ -64,7 +64,20 @@ def dump_to_file(benchmark, name):
     
 
     for batch, i in zip(batch_groups, range(len(batch_groups))):
-        batch_groups[i] = sorted(batch, key=lambda x: x[-2][-1])
+        new_batch = sorted(batch, key=lambda x: x[-2][-1])
+        if calc_diff:
+            # Go through the batch and calculate the difference
+            for entry, j in zip(new_batch, range(len(new_batch))):
+                avg_0 = entry[1]
+                avg_1 = entry[-1]
+                avg_0 = int(avg_0.strip("Average "))
+                avg_1 = int(avg_1.strip("Average "))
+                delta = avg_0 - avg_1
+                delta_string = " Delta: " + str(delta)
+                delta_tuple = (delta_string,)
+                new_batch[j] = new_batch[j] + delta_tuple
+
+        batch_groups[i] = new_batch
 
     with open(name+".txt", 'w+') as f:
         for batch in batch_groups:
@@ -72,9 +85,14 @@ def dump_to_file(benchmark, name):
                 f.write(str(entry) + "\n")
 
 l = []
-b11, b12, b13 = clean_average("benchmark1.txt")
-b21, b22, b23 = clean_average("benchmark2.txt")
-b31, b32, b33 = clean_average("benchmark3.txt")
+
+# The columns represent rw tests 1, 2 and 3 respectively
+# The second and third columns need to have the differences calculated
+# They are: 
+differences = (1,2,4,5,7,8)
+b11, b12, b13 = clean_average("benchmark1.txt") #benchmark 1 is local
+b21, b22, b23 = clean_average("benchmark2.txt") #benchmark 2 is local ver. 2
+b31, b32, b33 = clean_average("benchmark3.txt") #benchmark 3 is over the netwok
 
 l.append(b11)
 l.append(b12)
@@ -87,4 +105,8 @@ l.append(b32)
 l.append(b33)
 
 for x, i in zip(l, range(len(l))):
-    dump_to_file(x, str(i))
+    if i in differences:
+        dump_to_file(x, str(i), True)
+    else:
+        dump_to_file(x, str(i), False)
+
