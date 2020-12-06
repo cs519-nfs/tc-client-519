@@ -170,6 +170,15 @@ or:
 gather_data.sh runs tc_test_writev multiple times with different parameters which are mentioned in the report
 gdcopy.sh runs tc_test_rw in a similar fashion to gather_data.sh
 
+Deliverable 2 benchmarks can be run with:
+```
+		sudo bash benchmark.sh
+```
+The script benchmark.sh will need to be copied into debug/MainNFSD similar to the previous benchmark scripts.
+The file alice.txt (tc_client/MainNFSD/alice.txt) will also need to be copied into debug/MainNFSD unless the
+path to the file is changed in the benchmarking script.
+
+
 Bugs
 ============
 As mentioned in the report, there are a few reproducible bugs.
