@@ -46,7 +46,7 @@ def clean_average(file):
     return benchmarks[0], benchmarks[1], benchmarks[2]
 
 #type, batch, sep
-def dump_to_file(benchmark, name, calc_diff):
+def dump_to_file(benchmark, name, calc_diff, calc_multipliers):
     
     batch_groups = [[],[],[],[]]
     for k in benchmark.keys():
@@ -65,19 +65,26 @@ def dump_to_file(benchmark, name, calc_diff):
 
     for batch, i in zip(batch_groups, range(len(batch_groups))):
         new_batch = sorted(batch, key=lambda x: x[-2][-1])
-        if calc_diff:
+        if calc_diff or calc_multipliers:
             # Go through the batch and calculate the difference
             for entry, j in zip(new_batch, range(len(new_batch))):
                 avg_0 = entry[1]
                 avg_1 = entry[-1]
                 avg_0 = int(avg_0.strip("Average "))
                 avg_1 = int(avg_1.strip("Average "))
-                delta = avg_0 - avg_1
-                delta_string = " Delta: " + str(delta)
-                delta_tuple = (delta_string,)
-                new_batch[j] = new_batch[j] + delta_tuple
+                if calc_diff:
+                    delta = avg_0 - avg_1
+                    delta_string = " Delta (seconds) " + str(delta/1000000.0)
+                    delta_tuple = (delta_string,)
+                    new_batch[j] = new_batch[j] + delta_tuple
+                if calc_multipliers:
+                    multiplier = avg_0/(1.0*avg_1)
+                    multiplier_string = " Multiplier " + str(multiplier)
+                    multiplier_tuple = (multiplier_string,)
+                    new_batch[j] = new_batch[j] + multiplier_tuple
 
         batch_groups[i] = new_batch
+
 
     with open(name+".txt", 'w+') as f:
         for batch in batch_groups:
@@ -106,7 +113,7 @@ l.append(b33)
 
 for x, i in zip(l, range(len(l))):
     if i in differences:
-        dump_to_file(x, str(i), True)
+        dump_to_file(x, str(i), True, True)
     else:
-        dump_to_file(x, str(i), False)
+        dump_to_file(x, str(i), False, True)
 
