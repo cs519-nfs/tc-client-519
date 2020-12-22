@@ -18,7 +18,7 @@
 static char tc_config_path[PATH_MAX];
 
 // #define DATA_LOCATION "./alice.txt"
-#define DEFAULT_LOG_FILE "/tmp/rw_benchmark_1.log"
+#define DEFAULT_LOG_FILE "/tmp/rw_benchmark_3.log"
 #define PARENT_DIR "/vfs0/new_test/"
 
 int main(int argc, char** argv){
